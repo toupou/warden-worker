@@ -1,8 +1,6 @@
 name: Build
 
 on:
-  push:
-    branches: [main, uat, release*]
   workflow_dispatch:
     inputs:
       target:
@@ -10,6 +8,7 @@ on:
         required: true
         type: choice
         options:
+          - all
           - dgcs
           - homx
           - ordi
@@ -18,7 +17,7 @@ on:
 jobs:
   deploy_all:
     name: Deploy all workers (on push)
-    if: ${{ github.event_name == 'push' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.target == 'all' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -97,13 +96,20 @@ jobs:
         run: |
           set -euo pipefail
           CFG="${{ matrix.config }}"
+
           case "$CFG" in
-            wrangler-dgcs.toml)   sed -i "s/\${D1_DATABASE_ID}/\${{ secrets.D1_DATABASE_ID_DGCS }}/g" "$CFG" ;;
-            wrangler-homx.toml)   sed -i "s/\${D1_DATABASE_ID}/\${{ secrets.D1_DATABASE_ID_HOMX }}/g" "$CFG" ;;
-            wrangler-ordi.toml)   sed -i "s/\${D1_DATABASE_ID}/\${{ secrets.D1_DATABASE_ID_ORDI }}/g" "$CFG" ;;
-            wrangler-private.toml) sed -i "s/\${D1_DATABASE_ID}/\${{ secrets.D1_DATABASE_ID_PRIVATE }}/g" "$CFG" ;;
+            wrangler-dgcs.toml)    D1_ID='${{ secrets.D1_DATABASE_ID_DGCS }}' ;;
+            wrangler-homx.toml)    D1_ID='${{ secrets.D1_DATABASE_ID_HOMX }}' ;;
+            wrangler-ordi.toml)    D1_ID='${{ secrets.D1_DATABASE_ID_ORDI }}' ;;
+            wrangler-private.toml) D1_ID='${{ secrets.D1_DATABASE_ID_PRIVATE }}' ;;
             *) echo "Unknown config: $CFG"; exit 1 ;;
           esac
+
+          # Escape replacement for sed (escape backslashes and '&')
+          D1_ID_ESCAPED="${D1_ID//\\/\\\\}"
+          D1_ID_ESCAPED="${D1_ID_ESCAPED//&/\\&}"
+
+          sed -i "s/\\${D1_DATABASE_ID}/${D1_ID_ESCAPED}/g" "$CFG"
 
       - name: Enable R2 binding when R2_NAME is provided
         env:
@@ -236,7 +242,7 @@ jobs:
 
   deploy_one:
     name: Deploy one worker (manual)
-    if: ${{ github.event_name == 'workflow_dispatch' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.target != 'all' }}
     runs-on: ubuntu-latest
     env:
       WORKER_BUILD_VERSION: "0.7.4"
@@ -316,13 +322,20 @@ jobs:
         run: |
           set -euo pipefail
           CFG="${{ steps.cfg.outputs.CFG }}"
+
           case "$CFG" in
-            wrangler-dgcs.toml)   sed -i "s/\${D1_DATABASE_ID}/\${{ secrets.D1_DATABASE_ID_DGCS }}/g" "$CFG" ;;
-            wrangler-homx.toml)   sed -i "s/\${D1_DATABASE_ID}/\${{ secrets.D1_DATABASE_ID_HOMX }}/g" "$CFG" ;;
-            wrangler-ordi.toml)   sed -i "s/\${D1_DATABASE_ID}/\${{ secrets.D1_DATABASE_ID_ORDI }}/g" "$CFG" ;;
-            wrangler-private.toml) sed -i "s/\${D1_DATABASE_ID}/\${{ secrets.D1_DATABASE_ID_PRIVATE }}/g" "$CFG" ;;
+            wrangler-dgcs.toml)    D1_ID='${{ secrets.D1_DATABASE_ID_DGCS }}' ;;
+            wrangler-homx.toml)    D1_ID='${{ secrets.D1_DATABASE_ID_HOMX }}' ;;
+            wrangler-ordi.toml)    D1_ID='${{ secrets.D1_DATABASE_ID_ORDI }}' ;;
+            wrangler-private.toml) D1_ID='${{ secrets.D1_DATABASE_ID_PRIVATE }}' ;;
             *) echo "Unknown config: $CFG"; exit 1 ;;
           esac
+
+          # Escape replacement for sed (escape backslashes and '&')
+          D1_ID_ESCAPED="${D1_ID//\\/\\\\}"
+          D1_ID_ESCAPED="${D1_ID_ESCAPED//&/\\&}"
+
+          sed -i "s/\\${D1_DATABASE_ID}/${D1_ID_ESCAPED}/g" "$CFG"
 
       - name: Enable R2 binding when R2_NAME is provided
         env:
