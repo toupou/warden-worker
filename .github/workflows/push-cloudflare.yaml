@@ -109,7 +109,7 @@ jobs:
           D1_ID_ESCAPED="${D1_ID//\\/\\\\}"
           D1_ID_ESCAPED="${D1_ID_ESCAPED//&/\\&}"
 
-          sed -i "s/\\${D1_DATABASE_ID}/${D1_ID_ESCAPED}/g" "$CFG"
+          sed -i "s/\${D1_DATABASE_ID}/${D1_ID_ESCAPED}/g" "$CFG"
 
       - name: Enable R2 binding when R2_NAME is provided
         env:
@@ -335,7 +335,7 @@ jobs:
           D1_ID_ESCAPED="${D1_ID//\\/\\\\}"
           D1_ID_ESCAPED="${D1_ID_ESCAPED//&/\\&}"
 
-          sed -i "s/\\${D1_DATABASE_ID}/${D1_ID_ESCAPED}/g" "$CFG"
+          sed -i "s/\${D1_DATABASE_ID}/${D1_ID_ESCAPED}/g" "$CFG"
 
       - name: Enable R2 binding when R2_NAME is provided
         env:
