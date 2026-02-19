@@ -217,6 +217,7 @@ jobs:
           exit 1
 
       - name: Seed global equivalent domains (optional)
+        if: false
         env:
           SEED_GLOBAL_DOMAINS: ${{ vars.SEED_GLOBAL_DOMAINS || 'true' }}
           GLOBAL_DOMAINS_URL: ${{ vars.GLOBAL_DOMAINS_URL }}
@@ -445,6 +446,7 @@ jobs:
           exit 1
 
       - name: Seed global equivalent domains (optional)
+        if: false
         env:
           SEED_GLOBAL_DOMAINS: ${{ vars.SEED_GLOBAL_DOMAINS || 'true' }}
           GLOBAL_DOMAINS_URL: ${{ vars.GLOBAL_DOMAINS_URL }}
