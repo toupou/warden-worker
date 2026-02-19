@@ -151,13 +151,12 @@ jobs:
             $WRANGLER d1 execute vault1 --remote --config "$CFG" --file sql/schema.sql
             echo "📝 Marking existing migrations as applied (schema.sql already includes them)"
             BOOTSTRAP_SQL="$(mktemp)"
-            cat >"${BOOTSTRAP_SQL}" <<'SQL'
-CREATE TABLE IF NOT EXISTS d1_migrations (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name TEXT UNIQUE NOT NULL,
-  applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-);
-SQL
+            printf '%s\n' \
+              'CREATE TABLE IF NOT EXISTS d1_migrations (' \
+              '  id INTEGER PRIMARY KEY AUTOINCREMENT,' \
+              '  name TEXT UNIQUE NOT NULL,' \
+              '  applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL' \
+              ');' >"${BOOTSTRAP_SQL}"
             shopt -s nullglob
             for f in migrations/*.sql; do
               echo "INSERT OR IGNORE INTO d1_migrations (name) VALUES ('$(basename "${f}")');" >>"${BOOTSTRAP_SQL}"
@@ -371,13 +370,12 @@ SQL
             $WRANGLER d1 execute vault1 --remote --config "$CFG" --file sql/schema.sql
             echo "📝 Marking existing migrations as applied (schema.sql already includes them)"
             BOOTSTRAP_SQL="$(mktemp)"
-            cat >"${BOOTSTRAP_SQL}" <<'SQL'
-CREATE TABLE IF NOT EXISTS d1_migrations (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name TEXT UNIQUE NOT NULL,
-  applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-);
-SQL
+            printf '%s\n' \
+              'CREATE TABLE IF NOT EXISTS d1_migrations (' \
+              '  id INTEGER PRIMARY KEY AUTOINCREMENT,' \
+              '  name TEXT UNIQUE NOT NULL,' \
+              '  applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL' \
+              ');' >"${BOOTSTRAP_SQL}"
             shopt -s nullglob
             for f in migrations/*.sql; do
               echo "INSERT OR IGNORE INTO d1_migrations (name) VALUES ('$(basename "${f}")');" >>"${BOOTSTRAP_SQL}"
