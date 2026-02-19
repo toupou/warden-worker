@@ -109,7 +109,9 @@ jobs:
           D1_ID_ESCAPED="${D1_ID//\\/\\\\}"
           D1_ID_ESCAPED="${D1_ID_ESCAPED//&/\\&}"
 
+          # Replace either generic or per-worker placeholder (some configs use D1_DATABASE_ID_<NAME>)
           sed -i "s/\${D1_DATABASE_ID}/${D1_ID_ESCAPED}/g" "$CFG"
+          sed -i "s/\${D1_DATABASE_ID_DGCS}/${D1_ID_ESCAPED}/g; s/\${D1_DATABASE_ID_HOMX}/${D1_ID_ESCAPED}/g; s/\${D1_DATABASE_ID_ORDI}/${D1_ID_ESCAPED}/g; s/\${D1_DATABASE_ID_PRIVATE}/${D1_ID_ESCAPED}/g" "$CFG"
 
       - name: Enable R2 binding when R2_NAME is provided
         env:
@@ -335,7 +337,9 @@ jobs:
           D1_ID_ESCAPED="${D1_ID//\\/\\\\}"
           D1_ID_ESCAPED="${D1_ID_ESCAPED//&/\\&}"
 
+          # Replace either generic or per-worker placeholder (some configs use D1_DATABASE_ID_<NAME>)
           sed -i "s/\${D1_DATABASE_ID}/${D1_ID_ESCAPED}/g" "$CFG"
+          sed -i "s/\${D1_DATABASE_ID_DGCS}/${D1_ID_ESCAPED}/g; s/\${D1_DATABASE_ID_HOMX}/${D1_ID_ESCAPED}/g; s/\${D1_DATABASE_ID_ORDI}/${D1_ID_ESCAPED}/g; s/\${D1_DATABASE_ID_PRIVATE}/${D1_ID_ESCAPED}/g" "$CFG"
 
       - name: Enable R2 binding when R2_NAME is provided
         env:
