@@ -98,10 +98,10 @@ jobs:
           CFG="${{ matrix.config }}"
 
           case "$CFG" in
-            wrangler-dgcs.toml)    D1_ID='${{ secrets.D1_DATABASE_ID_DGCS }}' ;;
-            wrangler-homx.toml)    D1_ID='${{ secrets.D1_DATABASE_ID_HOMX }}' ;;
-            wrangler-ordi.toml)    D1_ID='${{ secrets.D1_DATABASE_ID_ORDI }}' ;;
-            wrangler-private.toml) D1_ID='${{ secrets.D1_DATABASE_ID_PRIVATE }}' ;;
+            wrangler-dgcs.toml)    D1_ID="${{ secrets.D1_DATABASE_ID_DGCS }}" ;;
+            wrangler-homx.toml)    D1_ID="${{ secrets.D1_DATABASE_ID_HOMX }}" ;;
+            wrangler-ordi.toml)    D1_ID="${{ secrets.D1_DATABASE_ID_ORDI }}" ;;
+            wrangler-private.toml) D1_ID="${{ secrets.D1_DATABASE_ID_PRIVATE }}" ;;
             *) echo "Unknown config: $CFG"; exit 1 ;;
           esac
 
@@ -324,10 +324,10 @@ jobs:
           CFG="${{ steps.cfg.outputs.CFG }}"
 
           case "$CFG" in
-            wrangler-dgcs.toml)    D1_ID='${{ secrets.D1_DATABASE_ID_DGCS }}' ;;
-            wrangler-homx.toml)    D1_ID='${{ secrets.D1_DATABASE_ID_HOMX }}' ;;
-            wrangler-ordi.toml)    D1_ID='${{ secrets.D1_DATABASE_ID_ORDI }}' ;;
-            wrangler-private.toml) D1_ID='${{ secrets.D1_DATABASE_ID_PRIVATE }}' ;;
+            wrangler-dgcs.toml)    D1_ID="${{ secrets.D1_DATABASE_ID_DGCS }}" ;;
+            wrangler-homx.toml)    D1_ID="${{ secrets.D1_DATABASE_ID_HOMX }}" ;;
+            wrangler-ordi.toml)    D1_ID="${{ secrets.D1_DATABASE_ID_ORDI }}" ;;
+            wrangler-private.toml) D1_ID="${{ secrets.D1_DATABASE_ID_PRIVATE }}" ;;
             *) echo "Unknown config: $CFG"; exit 1 ;;
           esac
 
