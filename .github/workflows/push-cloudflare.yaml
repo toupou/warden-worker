@@ -11,6 +11,7 @@ on:
           - all
           - dgcs
           - homx
+          - makani
           - ordi
           - private
 
@@ -25,6 +26,7 @@ jobs:
         config:
           - wrangler-dgcs.toml
           - wrangler-homx.toml
+          - wrangler-makani.toml
           - wrangler-ordi.toml
           - wrangler-private.toml
     env:
@@ -100,6 +102,7 @@ jobs:
           case "$CFG" in
             wrangler-dgcs.toml)    D1_ID="${{ secrets.D1_DATABASE_ID_DGCS }}" ;;
             wrangler-homx.toml)    D1_ID="${{ secrets.D1_DATABASE_ID_HOMX }}" ;;
+            wrangler-makani.toml)  D1_ID="${{ secrets.D1_DATABASE_ID_MAKANI }}" ;;
             wrangler-ordi.toml)    D1_ID="${{ secrets.D1_DATABASE_ID_ORDI }}" ;;
             wrangler-private.toml) D1_ID="${{ secrets.D1_DATABASE_ID_PRIVATE }}" ;;
             *) echo "Unknown config: $CFG"; exit 1 ;;
@@ -111,7 +114,7 @@ jobs:
 
           # Replace either generic or per-worker placeholder (some configs use D1_DATABASE_ID_<NAME>)
           sed -i "s/\${D1_DATABASE_ID}/${D1_ID_ESCAPED}/g" "$CFG"
-          sed -i "s/\${D1_DATABASE_ID_DGCS}/${D1_ID_ESCAPED}/g; s/\${D1_DATABASE_ID_HOMX}/${D1_ID_ESCAPED}/g; s/\${D1_DATABASE_ID_ORDI}/${D1_ID_ESCAPED}/g; s/\${D1_DATABASE_ID_PRIVATE}/${D1_ID_ESCAPED}/g" "$CFG"
+          sed -i "s/\${D1_DATABASE_ID_DGCS}/${D1_ID_ESCAPED}/g; s/\${D1_DATABASE_ID_HOMX}/${D1_ID_ESCAPED}/g; s/\${D1_DATABASE_ID_MAKANI}/${D1_ID_ESCAPED}/g; s/\${D1_DATABASE_ID_ORDI}/${D1_ID_ESCAPED}/g; s/\${D1_DATABASE_ID_PRIVATE}/${D1_ID_ESCAPED}/g" "$CFG"
 
       - name: Enable R2 binding when R2_NAME is provided
         env:
@@ -269,6 +272,7 @@ jobs:
           case "${{ inputs.target }}" in
             dgcs)    echo "CFG=wrangler-dgcs.toml" >> "$GITHUB_OUTPUT" ;;
             homx)    echo "CFG=wrangler-homx.toml" >> "$GITHUB_OUTPUT" ;;
+            makani)  echo "CFG=wrangler-makani.toml" >> "$GITHUB_OUTPUT" ;;
             ordi)    echo "CFG=wrangler-ordi.toml" >> "$GITHUB_OUTPUT" ;;
             private) echo "CFG=wrangler-private.toml" >> "$GITHUB_OUTPUT" ;;
             *) echo "Unknown target: ${{ inputs.target }}"; exit 1 ;;
@@ -329,6 +333,7 @@ jobs:
           case "$CFG" in
             wrangler-dgcs.toml)    D1_ID="${{ secrets.D1_DATABASE_ID_DGCS }}" ;;
             wrangler-homx.toml)    D1_ID="${{ secrets.D1_DATABASE_ID_HOMX }}" ;;
+            wrangler-makani.toml)  D1_ID="${{ secrets.D1_DATABASE_ID_MAKANI }}" ;;
             wrangler-ordi.toml)    D1_ID="${{ secrets.D1_DATABASE_ID_ORDI }}" ;;
             wrangler-private.toml) D1_ID="${{ secrets.D1_DATABASE_ID_PRIVATE }}" ;;
             *) echo "Unknown config: $CFG"; exit 1 ;;
@@ -340,7 +345,7 @@ jobs:
 
           # Replace either generic or per-worker placeholder (some configs use D1_DATABASE_ID_<NAME>)
           sed -i "s/\${D1_DATABASE_ID}/${D1_ID_ESCAPED}/g" "$CFG"
-          sed -i "s/\${D1_DATABASE_ID_DGCS}/${D1_ID_ESCAPED}/g; s/\${D1_DATABASE_ID_HOMX}/${D1_ID_ESCAPED}/g; s/\${D1_DATABASE_ID_ORDI}/${D1_ID_ESCAPED}/g; s/\${D1_DATABASE_ID_PRIVATE}/${D1_ID_ESCAPED}/g" "$CFG"
+          sed -i "s/\${D1_DATABASE_ID_DGCS}/${D1_ID_ESCAPED}/g; s/\${D1_DATABASE_ID_HOMX}/${D1_ID_ESCAPED}/g; s/\${D1_DATABASE_ID_MAKANI}/${D1_ID_ESCAPED}/g; s/\${D1_DATABASE_ID_ORDI}/${D1_ID_ESCAPED}/g; s/\${D1_DATABASE_ID_PRIVATE}/${D1_ID_ESCAPED}/g" "$CFG"
 
       - name: Enable R2 binding when R2_NAME is provided
         env:
