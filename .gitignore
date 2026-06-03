@@ -16,4 +16,5 @@ sql/global_domains_seed.sql
 .ace-tool/
 .codex/
 .cursor/
-.claude/
+.claude/.DS_Store
+**/.DS_Store
