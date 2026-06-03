@@ -36,6 +36,8 @@ pub struct CipherTypeFields {
     pub password_history: Option<Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reprompt: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub key: Option<String>,
 }
 
 /// This struct represents the data stored in the `data` column of the `ciphers` table.
@@ -47,6 +49,43 @@ pub struct CipherData {
     pub notes: Option<String>,
     #[serde(flatten)]
     pub type_fields: CipherTypeFields,
+}
+
+impl CipherTypeFields {
+    fn normalize_for_storage(mut self) -> Self {
+        self.password_history = {
+            match self.password_history {
+                Some(Value::Array(entries)) => Some(Value::Array(
+                    entries
+                        .into_iter()
+                        .filter_map(normalize_password_history_entry)
+                        .collect(),
+                )),
+                Some(_) => Some(Value::Array(Vec::new())),
+                None => None,
+            }
+        };
+        self
+    }
+}
+
+impl CipherData {
+    pub fn new(name: String, notes: Option<String>, type_fields: CipherTypeFields) -> Self {
+        Self {
+            name,
+            notes,
+            type_fields: type_fields.normalize_for_storage(),
+        }
+    }
+}
+
+fn normalize_password_history_entry(entry: Value) -> Option<Value> {
+    match entry {
+        Value::Object(map) if matches!(map.get("password"), Some(Value::String(_))) => {
+            Some(Value::Object(map))
+        }
+        _ => None,
+    }
 }
 
 // Custom deserialization function for booleans
@@ -125,6 +164,8 @@ pub struct Cipher {
     pub folder_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub deleted_at: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub archived_at: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 
@@ -156,6 +197,7 @@ pub struct CipherDBModel {
     pub favorite: i32,
     pub folder_id: Option<String>,
     pub deleted_at: Option<String>,
+    pub archived_at: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -171,6 +213,7 @@ impl From<CipherDBModel> for Cipher {
             favorite: val.favorite != 0,
             folder_id: val.folder_id,
             deleted_at: val.deleted_at,
+            archived_at: val.archived_at,
             created_at: val.created_at,
             updated_at: val.updated_at,
             object: default_object(),
@@ -213,10 +256,14 @@ impl Serialize for Cipher {
             "organizationUseTotp".to_string(),
             json!(self.organization_use_totp),
         );
-        response_map.insert("collectionIds".to_string(), json!(self.collection_ids));
+        response_map.insert(
+            "collectionIds".to_string(),
+            json!(&self.collection_ids.as_deref().unwrap_or(&[])),
+        );
         response_map.insert("revisionDate".to_string(), json!(self.updated_at));
         response_map.insert("creationDate".to_string(), json!(self.created_at));
         response_map.insert("deletedDate".to_string(), json!(self.deleted_at));
+        response_map.insert("archivedDate".to_string(), json!(self.archived_at));
         response_map.insert("attachments".to_string(), json!(self.attachments));
 
         if let Some(data_obj) = self.data.as_object() {
@@ -232,14 +279,17 @@ impl Serialize for Cipher {
             );
             response_map.insert(
                 "fields".to_string(),
-                data_clone.get("fields").cloned().unwrap_or(Value::Null),
+                data_clone
+                    .get("fields")
+                    .cloned()
+                    .unwrap_or_else(|| json!([])),
             );
             response_map.insert(
                 "passwordHistory".to_string(),
                 data_clone
                     .get("passwordHistory")
                     .cloned()
-                    .unwrap_or(Value::Null),
+                    .unwrap_or_else(|| json!([])),
             );
             response_map.insert(
                 "reprompt".to_string(),
@@ -247,6 +297,10 @@ impl Serialize for Cipher {
                     .get("reprompt")
                     .cloned()
                     .unwrap_or(Value::Number(serde_json::Number::from_f64(0.0).unwrap())),
+            );
+            response_map.insert(
+                "key".to_string(),
+                data_clone.get("key").cloned().unwrap_or(Value::Null),
             );
 
             let mut login = Value::Null;
@@ -272,8 +326,8 @@ impl Serialize for Cipher {
         } else {
             response_map.insert("name".to_string(), Value::Null);
             response_map.insert("notes".to_string(), Value::Null);
-            response_map.insert("fields".to_string(), Value::Null);
-            response_map.insert("passwordHistory".to_string(), Value::Null);
+            response_map.insert("fields".to_string(), json!([]));
+            response_map.insert("passwordHistory".to_string(), json!([]));
             response_map.insert("reprompt".to_string(), Value::Null);
             response_map.insert("login".to_string(), Value::Null);
             response_map.insert("secureNote".to_string(), Value::Null);
@@ -304,6 +358,7 @@ pub struct CipherRequestData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
     // Folder id is not included in import (determined by folder_relationships)
+    #[serde(default, deserialize_with = "super::deser_opt_nonempty_str")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub folder_id: Option<String>,
     #[serde(alias = "organizationID")]
@@ -363,6 +418,7 @@ pub struct CipherListResponse {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PartialCipherData {
+    #[serde(default, deserialize_with = "super::deser_opt_nonempty_str")]
     pub folder_id: Option<String>,
     pub favorite: bool,
 }
